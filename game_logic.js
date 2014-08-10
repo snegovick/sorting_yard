@@ -4,7 +4,7 @@ GameLogic.prototype = {
   default_velocity: 0,
   car_w: 30,
   car_h: 60,
-  const_new_car_timeout: 10,
+  const_new_car_timeout: 4,
   const_ticks_in_s: gamescreen.const_fps,
   const_ms_in_s: 1000,
   second_ctr: 0,
@@ -156,24 +156,39 @@ GameLogic.prototype = {
     return true;
   },
 
-  displayCar: function(self, cid) {
-    var angle = self.cars[cid]["orientation"];
-    var cx = self.cars[cid]["position"][0];
-    var cy = self.cars[cid]["position"][1];
-    var vel = self.cars[cid]["velocity"];
-    var color = self.cars[cid]["color"];
-
-    gamescreen.put_rect(gamescreen, color, angle, cx, cy, self.car_w, self.car_h);
-  },
-
-  displayStoppedCar: function(self, car) {
+  displaySingleCar: function(self, car) {
     var angle = car["orientation"];
     var cx = car["position"][0];
     var cy = car["position"][1];
     var vel = car["velocity"];
     var color = car["color"];
 
-    gamescreen.put_rect(gamescreen, color, angle, cx, cy, self.car_w, self.car_h);
+    if (color == "red") {
+      var sprite = map.sprites["red_tank"];
+      if (angle<0) {
+        angle += Math.PI*2;
+      }
+      var str = "orig angle:"+angle+" ";
+      angle = angle * 8;
+      angle = angle/(2*Math.PI);
+      angle = Math.round(angle);
+      //console.log(str+"angle:", angle);
+      if (angle>=8) {
+        angle = 0;
+      }
+      sprite.drawFrame(sprite, angle, cx, cy);
+    } else {
+      gamescreen.put_rect(gamescreen, color, angle, cx, cy, self.car_w, self.car_h);
+    }
+
+  },
+
+  displayCar: function(self, cid) {
+    self.displaySingleCar(self, self.cars[cid]);
+  },
+
+  displayStoppedCar: function(self, car) {
+    self.displaySingleCar(self, car);
   },
 
   init_switches: function(self) {

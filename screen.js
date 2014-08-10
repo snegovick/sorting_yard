@@ -12,8 +12,10 @@ GameScreen.prototype = {
   init: function(self) {
     self.frame_timeout = 1000/self.const_fps;
     self.canvas = document.getElementById("canvas");
-    self.canvas.width = window.innerWidth;
-    self.canvas.height = window.innerHeight;
+    var min_dim = Math.min(window.innerWidth, window.innerHeight);
+    console.log("min_dim:", min_dim);
+    self.canvas.width = min_dim;
+    self.canvas.height = min_dim;
     self.width = self.canvas.width;
     self.height = self.canvas.height;
     self.ctx = self.canvas.getContext("2d");

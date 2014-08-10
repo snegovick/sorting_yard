@@ -21,8 +21,10 @@ GameScreen.prototype = {
   init: function(self) {
     self.frame_timeout = 1000/self.const_fps;
     self.canvas = document.getElementById("canvas");
-    self.canvas.width = window.innerWidth;
-    self.canvas.height = window.innerHeight;
+    var min_dim = Math.min(window.innerWidth, window.innerHeight);
+    console.log("min_dim:", min_dim);
+    self.canvas.width = min_dim;
+    self.canvas.height = min_dim;
     self.width = self.canvas.width;
     self.height = self.canvas.height;
     self.ctx = self.canvas.getContext("2d");
@@ -82,6 +84,51 @@ GameScreen.prototype = {
 };
 
 var gamescreen = new GameScreen();
+function Sprite() {};
+
+Sprite.prototype = {
+  paths: [],
+  img_objects: [],
+  frame_time: 1,
+  current_frame: 0,
+  frame_time_counter: 0,
+
+  init: function(self, path) {
+    self.this = self;
+    self.paths.push(path);
+  },
+
+  initMultiPath: function(self, paths, frame_time) {
+    self.paths = paths;
+    self.animation_speed = frame_time;
+    self.loadImages(self);
+  },
+
+  loadImages: function(self) {
+    for (var i = 0; i < self.paths.length; i++) {
+      var img = new Image();
+      img.src = self.paths[i];
+      self.img_objects.push(img);
+    }
+  },
+
+  drawFrame: function(self, frame, x, y) {
+    var img = self.img_objects[frame];
+    gamescreen.ctx.drawImage(img, x-img.width/2, y-img.height/2);
+  },
+
+  draw: function(self, x, y) {
+    self.frame_time_counter ++;
+    if (self.frame_time_counter > self.frame_time) {
+      self.frame_time_counter = 0;
+      self.current_frame = self.current_frame + 1;
+      self.current_frame = self.current_frame % self.img_objects.length;
+    }
+    self.drawFrame(self, self.current_frame);
+  }
+
+};
+
 function Map() {};
 
 Map.prototype = {
@@ -92,10 +139,10 @@ Map.prototype = {
       2: [0.5, 0.4],
       3: [0.5, 0.9],
       
-      4: [0.2, 0.6],
+      4: [0.2, 0.473],
       5: [0.2, 0.9],
       
-      6: [0.7, 0.6],
+      6: [0.7, 0.515],
       7: [0.7, 0.9]
     },
 
@@ -108,11 +155,30 @@ Map.prototype = {
       5: [],
       6: [7],
       7: []
+    },
+
+    "sprites": {
+      "red_tank": [
+        "./sprites/128_red_tank/128_red_tank_1.png",
+        "./sprites/128_red_tank/128_red_tank_2.png",
+        "./sprites/128_red_tank/128_red_tank_3.png",
+        "./sprites/128_red_tank/128_red_tank_4.png",
+        "./sprites/128_red_tank/128_red_tank_5.png",
+        "./sprites/128_red_tank/128_red_tank_6.png",
+        "./sprites/128_red_tank/128_red_tank_7.png",
+        "./sprites/128_red_tank/128_red_tank_8.png"
+      ]
     }
   },
 
+  sprites: {
+    "red_tank": null
+  },
 
   init: function(self) {
+    var rt_sprite = new Sprite();
+    rt_sprite.initMultiPath(rt_sprite, self.map["sprites"]["red_tank"]);
+    self.sprites["red_tank"] = rt_sprite;
   },
 
   draw: function(self) {
@@ -126,7 +192,7 @@ GameLogic.prototype = {
   default_velocity: 0,
   car_w: 30,
   car_h: 60,
-  const_new_car_timeout: 10,
+  const_new_car_timeout: 4,
   const_ticks_in_s: gamescreen.const_fps,
   const_ms_in_s: 1000,
   second_ctr: 0,
@@ -278,24 +344,39 @@ GameLogic.prototype = {
     return true;
   },
 
-  displayCar: function(self, cid) {
-    var angle = self.cars[cid]["orientation"];
-    var cx = self.cars[cid]["position"][0];
-    var cy = self.cars[cid]["position"][1];
-    var vel = self.cars[cid]["velocity"];
-    var color = self.cars[cid]["color"];
-
-    gamescreen.put_rect(gamescreen, color, angle, cx, cy, self.car_w, self.car_h);
-  },
-
-  displayStoppedCar: function(self, car) {
+  displaySingleCar: function(self, car) {
     var angle = car["orientation"];
     var cx = car["position"][0];
     var cy = car["position"][1];
     var vel = car["velocity"];
     var color = car["color"];
 
-    gamescreen.put_rect(gamescreen, color, angle, cx, cy, self.car_w, self.car_h);
+    if (color == "red") {
+      var sprite = map.sprites["red_tank"];
+      if (angle<0) {
+        angle += Math.PI*2;
+      }
+      var str = "orig angle:"+angle+" ";
+      angle = angle * 8;
+      angle = angle/(2*Math.PI);
+      angle = Math.round(angle);
+      console.log(str+"angle:", angle);
+      if (angle>=8) {
+        angle = 0;
+      }
+      sprite.drawFrame(sprite, angle, cx, cy);
+    } else {
+      gamescreen.put_rect(gamescreen, color, angle, cx, cy, self.car_w, self.car_h);
+    }
+
+  },
+
+  displayCar: function(self, cid) {
+    self.displaySingleCar(self, self.cars[cid]);
+  },
+
+  displayStoppedCar: function(self, car) {
+    self.displaySingleCar(self, car);
   },
 
   init_switches: function(self) {
