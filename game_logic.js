@@ -4,7 +4,7 @@ GameLogic.prototype = {
   default_velocity: 0,
   car_w: 30,
   car_h: 60,
-  const_new_car_timeout: 2,
+  const_new_car_timeout: 10,
   const_ticks_in_s: gamescreen.const_fps,
   const_ms_in_s: 1000,
   second_ctr: 0,
@@ -39,7 +39,7 @@ GameLogic.prototype = {
     var sx = map.map["rail_points"][0][0]*gamescreen.width;
     var sy = map.map["rail_points"][0][1]*gamescreen.height;
 
-    self.cars.push({"position": [sx, sy], "orientation": 0.0, "heading_sin": 0.0, "heading_cos": 0.0, "velocity": self.default_velocity, "color": self.colors[get_random_int(0, self.colors.length-1)], "destination_pt": 1});
+    self.cars.push({"position": [sx, sy], "orientation": 0.0, "heading_sin": 0.0, "heading_cos": 0.0, "velocity": self.default_velocity, "color": self.colors[get_random_int(0, self.colors.length)], "destination_pt": 1});
     self.__calc_orientation(self, self.cars.length-1, 0, 1);
   },
 
@@ -54,7 +54,35 @@ GameLogic.prototype = {
     if (pt_to_pt_dist(self.cars[cid]["position"], start) < self.car_h*1.5) {
       self.level_stop = true;
     }
+    if (self.checkIfTaskComplete(self, dest_pt_id)) {
+      self.score += self.calcScore(self, dest_pt_id);
+      delete self.trains[dest_pt_id];
+      self.init_single_task(self, dest_pt_id);
+    }
     self.cars.splice(cid, 1);
+  },
+
+  calcScore: function(self, tid) {
+    var score = 0;
+    var multiplier = 10;
+    for (var i = 0; i < self.colors.length; i++) {
+      var color = self.colors[i];
+      var cur = self.tasks[tid][color];
+      var target = self.tasks[tid]["orig_task"][color];
+      var sum = cur+target;
+      console.log(sum);
+      score+=sum*multiplier;
+    }
+    return score;
+  },
+
+  checkIfTaskComplete: function(self, tid) {
+    for (var i = 0; i < self.colors.length; i++) {
+      if (self.tasks[tid][self.colors[i]]>0) {
+        return false;
+      }
+    }
+    return true;
   },
 
   checkStoppedCars: function(self, cid) {
@@ -105,8 +133,8 @@ GameLogic.prototype = {
     if (pt_to_pt_dist(car_pos, dest_pt) <= 2) {
       if (dest_pt_id in self.switches) {
         var state = self.switches[dest_pt_id]["state"];
-        console.log("checking switch");
-        console.log("state:"+state);
+        //console.log("checking switch");
+        //console.log("state:"+state);
         var new_dest_pt_id = map.map["rail_graph_adj_list"][dest_pt_id][state];
         self.cars[cid]["destination_pt"] = new_dest_pt_id;
         self.__calc_orientation(self, cid, dest_pt_id, new_dest_pt_id);
@@ -123,7 +151,7 @@ GameLogic.prototype = {
           self.__calc_orientation(self, cid, dest_pt_id, new_dest_pt_id);
         }
       }
-      console.log("new destination pt for car["+cid+"] : "+self.cars[cid]["destination_pt"]);
+      //console.log("new destination pt for car["+cid+"] : "+self.cars[cid]["destination_pt"]);
     }
     return true;
   },
@@ -135,14 +163,7 @@ GameLogic.prototype = {
     var vel = self.cars[cid]["velocity"];
     var color = self.cars[cid]["color"];
 
-    gamescreen.ctx.translate(cx, cy);
-    gamescreen.ctx.rotate(angle);
-    var old_color = gamescreen.ctx.fillStyle;
-    gamescreen.ctx.fillStyle = color;
-    gamescreen.ctx.fillRect(-self.car_w/2, -self.car_h/2, self.car_w, self.car_h);
-    gamescreen.ctx.fillStyle = old_color;
-    gamescreen.ctx.rotate(-angle);
-    gamescreen.ctx.translate(-cx, -cy);
+    gamescreen.put_rect(gamescreen, color, angle, cx, cy, self.car_w, self.car_h);
   },
 
   displayStoppedCar: function(self, car) {
@@ -152,14 +173,7 @@ GameLogic.prototype = {
     var vel = car["velocity"];
     var color = car["color"];
 
-    gamescreen.ctx.translate(cx, cy);
-    gamescreen.ctx.rotate(angle);
-    var old_color = gamescreen.ctx.fillStyle;
-    gamescreen.ctx.fillStyle = color;
-    gamescreen.ctx.fillRect(-self.car_w/2, -self.car_h/2, self.car_w, self.car_h);
-    gamescreen.ctx.fillStyle = old_color;
-    gamescreen.ctx.rotate(-angle);
-    gamescreen.ctx.translate(-cx, -cy);
+    gamescreen.put_rect(gamescreen, color, angle, cx, cy, self.car_w, self.car_h);
   },
 
   init_switches: function(self) {
@@ -181,6 +195,8 @@ GameLogic.prototype = {
           self.tasks[p] = {};
           for (var i = 0; i < self.colors.length; i++) {
             self.tasks[p][self.colors[i]] = 0;
+            self.tasks[p]["orig_task"] = {};
+            self.tasks[p]["orig_task"][self.colors[i]] = 0;
           }
           self.init_single_task(self, p);
         }
@@ -189,12 +205,15 @@ GameLogic.prototype = {
   },
 
   init_single_task: function(self, task_id) {
-    for (var c in self.tasks[task_id]) {
-      self.tasks[task_id][c] = get_random_int(0, 4);
+    for (var i = 0; i < self.colors.length; i++) {
+      var c = self.colors[i];
+      var value = get_random_int(0, 4);
+      self.tasks[task_id][c] = value;
+      self.tasks[task_id]["orig_task"][c] = value;
     }
   },
 
-  displayRailNode: function(self, n) {
+  displayRailNode: function(self, n, prev_green) {
     //console.log("drawing "+n);
     var pt_width = 5;
     var cx = map.map["rail_points"][n][0]*gamescreen.width;
@@ -203,20 +222,26 @@ GameLogic.prototype = {
     var n_beams = map.map["rail_graph_adj_list"][n].length;
     if (n_beams > 0) {
       // display switch controls
+      var beam = 0;
       if (n_beams > 1) {
-        gamescreen.ctx.fillText(self.switches[n]["id"], cx-20, cy-20)
+        gamescreen.put_text(gamescreen, "bold 16px Arial", "black", self.switches[n]["id"], cx-20, cy-20);
+        beam = self.switches[n]["state"];
       }
 
       // draw outgoint beams
       for (var i = 0; i < map.map["rail_graph_adj_list"][n].length; i++) {
         p = map.map["rail_graph_adj_list"][n][i];
-        gamescreen.ctx.beginPath();
-        gamescreen.ctx.moveTo(cx, cy);
+        var style = "black";
+        if (prev_green) {
+          if (i == beam) {
+            style = "green";
+          }
+        }
         var ox = map.map["rail_points"][p][0]*gamescreen.width;
         var oy = map.map["rail_points"][p][1]*gamescreen.height;
-        gamescreen.ctx.lineTo(ox, oy);
-        gamescreen.ctx.stroke();
-        self.displayRailNode(self, p);
+
+        gamescreen.put_line(gamescreen, style, cx, cy, ox, oy);
+        self.displayRailNode(self, p, style == "green");
       }
     }
   },
@@ -243,35 +268,25 @@ GameLogic.prototype = {
 
   drawTasks: function(self) {
     for (var t in self.tasks) {
-      tx = map.map["rail_points"][t][0]*gamescreen.width;
-      ty = map.map["rail_points"][t][1]*gamescreen.height;
+      var tx = map.map["rail_points"][t][0]*gamescreen.width;
+      var ty = map.map["rail_points"][t][1]*gamescreen.height;
       var old_color = gamescreen.ctx.fillStyle;
-      gamescreen.ctx.fillStyle = "blue";
-      gamescreen.ctx.fillRect(tx-100, ty-100, 10, 10);
-      gamescreen.ctx.fillStyle = old_color;
-      gamescreen.ctx.fillText("x"+self.tasks[t]["blue"], tx-80, ty-95);
-
-      gamescreen.ctx.fillStyle = "green";
-      gamescreen.ctx.fillRect(tx-100, ty-50, 10, 10);
-      gamescreen.ctx.fillStyle = old_color;      
-      gamescreen.ctx.fillText("x"+self.tasks[t]["green"], tx-80, ty-45);
-
-      gamescreen.ctx.fillStyle = "red";
-      gamescreen.ctx.fillRect(tx-100, ty, 10, 10);
-      gamescreen.ctx.fillStyle = old_color;
-      
-      gamescreen.ctx.fillText("x"+self.tasks[t]["red"], tx-80, ty+5);
+      var spread = 30;
+      for (var i = 0; i < self.colors.length; i++) {
+        gamescreen.put_rect(gamescreen, self.colors[i], 0, tx - 100, ty - i*spread, 10, 10);
+        gamescreen.put_text(gamescreen, "bold 16px Arial", "black", "x"+self.tasks[t][self.colors[i]], tx - 80, ty - i*spread+8);
+      }
     }
   },
 
   init: function(self) {
-    self.default_velocity = gamescreen.height/10;
+    self.default_velocity = gamescreen.height/30;
     self.init_tasks(self);
     self.init_switches(self);
   },
 
   draw: function(self) {
-    self.displayRailNode(self, 0);
+    self.displayRailNode(self, 0, true);
     self.drawTasks(self);
 
     self.second_ctr ++;
@@ -312,7 +327,9 @@ GameLogic.prototype = {
       gamescreen.ctx.fillText(go, gamescreen.width/2-go_width/2, gamescreen.height/2-go_height/2);
       gamescreen.ctx.font = old_font;
     }
-    
+
+    //draw score
+    gamescreen.put_text(gamescreen, "bold 20px Arial", "black", "Score: "+self.score, 100, 100);
   }
 };
 
