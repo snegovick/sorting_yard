@@ -360,7 +360,7 @@ GameLogic.prototype = {
       angle = angle * 8;
       angle = angle/(2*Math.PI);
       angle = Math.round(angle);
-      console.log(str+"angle:", angle);
+      //console.log(str+"angle:", angle);
       if (angle>=8) {
         angle = 0;
       }
