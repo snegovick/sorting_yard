@@ -12,13 +12,12 @@ else
     mkdir sprites/1000_red_tank
     mkdir sprites/1000_straight_rail
 
-    pushd media_src
-    
-    blender -b ./locomotive.blend -o ../sprites/1000_locomotive -F PNG -s 0 -e 7 -a
-    blender -b ./red_tank.blend -o ../sprites/1000_red_tank -F PNG -s 0 -e 7 -a
-    blender -b ./straight_rail.blend -o ../sprites/1000_straight_rail -F PNG -s 0 -e 7 -a
+    root_dir=$(pwd)
+    echo "root dir: ${root_dir}"
 
-    popd
+    blender -b "./media_src/locomotive.blend" -o "${root_dir}/sprites/1000_locomotive/" -F PNG -s 0 -e 7 -a
+    blender -b "./media_src/red_tank.blend" -o "${root_dir}/sprites/1000_red_tank/" -F PNG -s 0 -e 7 -a
+    blender -b "./media_src/straight_rail.blend" -o "${root_dir}/sprites/1000_straight_rail/" -F PNG -s 0 -e 7 -a
 
     bash ./util/resize.sh ./sprites/1000_locomotive ./sprites/128_locomotive 128
     bash ./util/resize.sh ./sprites/1000_red_tank ./sprites/128_red_tank 128

@@ -20,6 +20,7 @@ if [ $3 -le 0 ]; then
     echo ${USAGE}
 fi
 
-for f in "$(ls "$1")"; do
+for f in $(ls "$1"); do
+    echo "converting $1/$f"
 	  convert "$1/$f" -resize $3x$3 "$2/$f";
 done
