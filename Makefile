@@ -74,16 +74,18 @@ build-sprites-$(1): $(call model_sprites,$(1),128,$(call model_name,$(1))_)
 
 $(call model_sprites,$(1),1000): $(call model_source,$(1))
 	@echo 'Building sprites for $(1)'
-	@mkdir -p $$(sort $$(dir $$^))
+	@mkdir -p $$(sort $$(dir $$@))
 	@blender -noaudio -b "$$<" -o "$$(dir $$@)" -F PNG -a
 
 $(call model_sprite,$(1),128,$(call model_name,$(1))_%): $(call model_sprite,$(1),1000,%)
 	@echo 'Rescale sprite $$* for $(1)'
+	@mkdir -p $$(sort $$(dir $$@))
 	@convert "$$<" -scale $(call model_new_size,$(1)) "$$@"
 
 clean-sprites-$(1):
 	@echo 'Cleaning sprites for $(1)'
 	@rm -f $(call model_sprites,$(1),1000) $(call model_sprites,$(1),128,$(call model_name,$(1))_)
+	@rm -rf $(dir $(call model_sprites,$(1),1000) $(call model_sprites,$(1),128))
 endef
 
 $(foreach m,$(models),$(eval $(call sprites-ruleset,$(m))))
