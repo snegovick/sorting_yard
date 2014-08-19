@@ -1,0 +1,3 @@
+[submodule "map_editor"]
+	path = map_editor
+	url = https://github.com/snegovick/map_editor.git
