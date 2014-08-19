@@ -27,4 +27,4 @@ make_dir straight_rail 1 128x256
 make_dir clean_tile 0 128x256
 make_dir straight_angle_rail 3 128x256
 
-python ../map_editor/tileset_editor/tileset_editor.py --reexport --project ./media/tilesets/level_0.tset_project --out ./media/tilesets/level_0
+python ./map_editor/tileset_editor/tileset_editor.py --reexport --project ./media/tilesets/level_0.tset_project --out ./media/tilesets/level_0
