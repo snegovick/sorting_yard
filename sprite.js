@@ -1,28 +1,22 @@
 function Sprite() {};
 
 Sprite.prototype = {
-  paths: [],
-  img_objects: [],
-  frame_time: 1,
-  current_frame: 0,
-  frame_time_counter: 0,
+  origins: [],
+  dimensions: [],
+  frames: 0,
+  name: name,
 
-  init: function(self, path) {
+  init: function(self, name, map_json) {
     self.this = self;
-    self.paths.push(path);
-  },
-
-  initMultiPath: function(self, paths, frame_time) {
-    self.paths = paths;
-    self.animation_speed = frame_time;
-    self.loadImages(self);
-  },
-
-  loadImages: function(self) {
-    for (var i = 0; i < self.paths.length; i++) {
-      var img = new Image();
-      img.src = self.paths[i];
-      self.img_objects.push(img);
+    var sprite_json = map_json["sprites"][name];
+    self.name = name;
+    image_refs = sprite_json["image_refs"];
+    frames = image_refs.length;
+    for (var i = 0; i < frames; i++) {
+      origin = map_json["images"][image_refs[i]]["origin"];
+      self.origins.push_back(origin);
+      dimensions = map_json["images"][image_refs[i]]["dimensions"];
+      self.dimensions.push_back(dimensions);
     }
   },
 
