@@ -5,21 +5,22 @@ Layer.prototype = {
   adjacency_dct: {},
   proxys: []
 
-  init: function(self, id, map_json) {
-    var layer_json = map_json["layers"][id];
-    self.name = map_json["layers"][id]["name"];
+  init: function(self, layer_json) {
+    self.name = layer_json["name"];
     self.adjacency_dct = layer_json["adjacency_dct"];
-    
+    var objects = layer_json["objects"];
+    for (var i = 0; i < objects.length; i++) {
+      var proxy_json = objects[i];
+      var proxy = new Proxy();
+      proxy.init(proxy, proxy_json);
+      self.proxys.push_back(proxy);
+    }
   },
 
-  draw: function(self, x, y) {
-    self.frame_time_counter ++;
-    if (self.frame_time_counter > self.frame_time) {
-      self.frame_time_counter = 0;
-      self.current_frame = self.current_frame + 1;
-      self.current_frame = self.current_frame % self.img_objects.length;
+  draw: function(self) {
+    for (var i = 0; i < self.proxys.length; i++) {
+      self.proxys[i].draw();
     }
-    self.drawFrame(self, self.current_frame);
   }
 };
 

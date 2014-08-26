@@ -1,10 +1,22 @@
 function Proxy() {};
 
 Proxy.prototype = {
-  origin: [],
-  name: name,
+  position: null,
+  name: null,
+  sprite: null,
+  frame: 0,
+  animated: false,
+  frame_time: 0,
 
-  init: function(self, name, tileset_json) {
+  frame_time_counter: 0,
+
+  init: function(self, proxy_json) {
+    self.name = proxy_json["name"];
+    self.position = proxy_json["position"];
+    self.frame = proxy_json["frame"];
+    self.animated = proxy_json["animated"];
+    self.frame_time = proxy_json["frame_time"];
+    self.sprite = map.get_sprite_by_name(map, proxy_json["sprite_ref"]);
   },
 
   draw: function(self, x, y) {

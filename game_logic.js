@@ -301,47 +301,47 @@ GameLogic.prototype = {
   },
 
   draw: function(self) {
-    self.displayRailNode(self, 0, true);
-    self.drawTasks(self);
+    // self.displayRailNode(self, 0, true);
+    // self.drawTasks(self);
 
-    self.second_ctr ++;
-    if (self.second_ctr > self.const_ticks_in_s) {
-      self.second_ctr = 0;
-      self.new_car_ctr ++;
-      if (self.new_car_ctr > self.const_new_car_timeout) {
-        self.new_car_ctr = 0;
-        if (!self.level_stop) {
-          self.mk_car(self);
-        }
-      }
-    }
+    // self.second_ctr ++;
+    // if (self.second_ctr > self.const_ticks_in_s) {
+    //   self.second_ctr = 0;
+    //   self.new_car_ctr ++;
+    //   if (self.new_car_ctr > self.const_new_car_timeout) {
+    //     self.new_car_ctr = 0;
+    //     if (!self.level_stop) {
+    //       self.mk_car(self);
+    //     }
+    //   }
+    // }
 
-    //console.log("cars length:"+self.cars.length);
-    for (var i = 0; i < self.cars.length; i++) {
-      self.displayCar(self, i);
-      if (!self.level_stop) {
-        if (!self.advanceCar(self, i)) {
-          i-=1;
-        }
-      }
-    }
+    // //console.log("cars length:"+self.cars.length);
+    // for (var i = 0; i < self.cars.length; i++) {
+    //   self.displayCar(self, i);
+    //   if (!self.level_stop) {
+    //     if (!self.advanceCar(self, i)) {
+    //       i-=1;
+    //     }
+    //   }
+    // }
 
-    for (var t in self.trains) {
-      for (var i = 0; i < self.trains[t]["cars"].length; i++) {
-        var car = self.trains[t]["cars"][i];
-        self.displayStoppedCar(self, car);
-      }
-    }
+    // for (var t in self.trains) {
+    //   for (var i = 0; i < self.trains[t]["cars"].length; i++) {
+    //     var car = self.trains[t]["cars"][i];
+    //     self.displayStoppedCar(self, car);
+    //   }
+    // }
     
-    if (self.level_stop) {
-      var old_font = gamescreen.ctx.font;
-      var go = "GAME OVER";
-      var go_width = go.length*24;
-      var go_height = 24;
-      gamescreen.ctx.font = "bold 24px Arial";
-      gamescreen.ctx.fillText(go, gamescreen.width/2-go_width/2, gamescreen.height/2-go_height/2);
-      gamescreen.ctx.font = old_font;
-    }
+    // if (self.level_stop) {
+    //   var old_font = gamescreen.ctx.font;
+    //   var go = "GAME OVER";
+    //   var go_width = go.length*24;
+    //   var go_height = 24;
+    //   gamescreen.ctx.font = "bold 24px Arial";
+    //   gamescreen.ctx.fillText(go, gamescreen.width/2-go_width/2, gamescreen.height/2-go_height/2);
+    //   gamescreen.ctx.font = old_font;
+    // }
 
     //draw score
     gamescreen.put_text(gamescreen, "bold 20px Arial", "black", "Score: "+self.score, 100, 100);

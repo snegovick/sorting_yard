@@ -1,28 +1,43 @@
+function LImage() {};
+
+Image.prototype = {
+  origin: null,
+  dimensions: null,
+  name: name,
+  image: null,
+
+  init: function(self, image_json) {
+    self.name = sprite_json["name"];
+    self.origin = image_json["origin"];
+    dimensions = image_json["dimensions"];
+  },
+
+  draw: function(self, x, y) {
+    gamescreen.ctx.drawImage(self.image, x-self.image.width/2, y-self.image.height/2);
+  }
+
+};
+
 function Sprite() {};
 
 Sprite.prototype = {
-  origins: [],
-  dimensions: [],
+  images: [],
   frames: 0,
   name: name,
 
-  init: function(self, name, map_json) {
-    self.this = self;
-    var sprite_json = map_json["sprites"][name];
-    self.name = name;
+  init: function(self, sprite_json) {
+    self.name = sprite_json["name"];
     image_refs = sprite_json["image_refs"];
-    frames = image_refs.length;
-    for (var i = 0; i < frames; i++) {
-      origin = map_json["images"][image_refs[i]]["origin"];
-      self.origins.push_back(origin);
-      dimensions = map_json["images"][image_refs[i]]["dimensions"];
-      self.dimensions.push_back(dimensions);
+    self.frames = image_refs.length;
+    for (var i = 0; i < self.frames; i++) {
+      var image = map.get_image_by_name(map, name);
+      self.images.push_back(image);
     }
   },
 
   drawFrame: function(self, frame, x, y) {
-    var img = self.img_objects[frame];
-    gamescreen.ctx.drawImage(img, x-img.width/2, y-img.height/2);
+    var image = self.images[frame];
+    image.draw(x, y);
   },
 
   draw: function(self, x, y) {
@@ -32,7 +47,7 @@ Sprite.prototype = {
       self.current_frame = self.current_frame + 1;
       self.current_frame = self.current_frame % self.img_objects.length;
     }
-    self.drawFrame(self, self.current_frame);
+    self.drawFrame(self, self.current_frame, x, y);
   }
 
 };

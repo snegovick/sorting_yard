@@ -84,24 +84,46 @@ GameScreen.prototype = {
 };
 
 var gamescreen = new GameScreen();
+function LImage() {};
+
+Image.prototype = {
+  origin: null,
+  dimensions: null,
+  name: name,
+  image: null,
+
+  init: function(self, image_json) {
+    self.name = sprite_json["name"];
+    self.origin = image_json["origin"];
+    dimensions = image_json["dimensions"];
+  },
+
+  draw: function(self, x, y) {
+    gamescreen.ctx.drawImage(self.image, x-self.image.width/2, y-self.image.height/2);
+  }
+
+};
+
 function Sprite() {};
 
 Sprite.prototype = {
-  origins: [],
-  dimensions: [],
+  images: [],
   frames: 0,
-  animated: false,
-  frame_time: 1,
-  current_frame: 0,
-  frame_time_counter: 0,
+  name: name,
 
-  init: function(self, name, tileset_json) {
-    self.this = self;
+  init: function(self, sprite_json) {
+    self.name = sprite_json["name"];
+    image_refs = sprite_json["image_refs"];
+    self.frames = image_refs.length;
+    for (var i = 0; i < self.frames; i++) {
+      var image = map.get_image_by_name(map, name);
+      self.images.push_back(image);
+    }
   },
 
   drawFrame: function(self, frame, x, y) {
-    var img = self.img_objects[frame];
-    gamescreen.ctx.drawImage(img, x-img.width/2, y-img.height/2);
+    var image = self.images[frame];
+    image.draw(x, y);
   },
 
   draw: function(self, x, y) {
@@ -111,7 +133,7 @@ Sprite.prototype = {
       self.current_frame = self.current_frame + 1;
       self.current_frame = self.current_frame % self.img_objects.length;
     }
-    self.drawFrame(self, self.current_frame);
+    self.drawFrame(self, self.current_frame, x, y);
   }
 
 };
@@ -120,22 +142,31 @@ function Map() {};
 
 Map.prototype = {
   map: {"layers": [{"adjacency_dct": {}, "type": "layer", "name": "main", "objects": [{"sprite_ref": "rail", "name": "4", "position": [448, 0], "frame": 4, "animated": false, "type": "proxy", "id": 4, "frame_time": 10}, {"sprite_ref": "rail", "name": "7", "position": [384, 32], "frame": 4, "animated": false, "type": "proxy", "id": 7, "frame_time": 10}, {"sprite_ref": "rail", "name": "5", "position": [512, 32], "frame": 4, "animated": false, "type": "proxy", "id": 5, "frame_time": 10}, {"sprite_ref": "rail", "name": "6", "position": [448, 64], "frame": 4, "animated": false, "type": "proxy", "id": 6, "frame_time": 10}, {"sprite_ref": "rail", "name": "9", "position": [576, 64], "frame": 4, "animated": false, "type": "proxy", "id": 9, "frame_time": 10}, {"sprite_ref": "rail", "name": "8", "position": [512, 96], "frame": 4, "animated": false, "type": "proxy", "id": 8, "frame_time": 10}]}], "grid_step": [32, 32], "map_size": [256, 256], "format": 1, "images": {"red_tank_0001.png": {"origin": [896, 768], "type": "image", "dimensions": [128, 128], "name": "red_tank_0001.png"}, "straight_angle_rail_0003.png": {"origin": [0, 512], "type": "image", "dimensions": [128, 256], "name": "straight_angle_rail_0003.png"}, "straight_angle_rail_0001.png": {"origin": [256, 512], "type": "image", "dimensions": [128, 256], "name": "straight_angle_rail_0001.png"}, "red_tank_0005.png": {"origin": [384, 768], "type": "image", "dimensions": [128, 128], "name": "red_tank_0005.png"}, "red_tank_0004.png": {"origin": [0, 768], "type": "image", "dimensions": [128, 128], "name": "red_tank_0004.png"}, "red_tank_0006.png": {"origin": [768, 768], "type": "image", "dimensions": [128, 128], "name": "red_tank_0006.png"}, "locomotive_0007.png": {"origin": [0, 896], "type": "image", "dimensions": [128, 128], "name": "locomotive_0007.png"}, "locomotive_0004.png": {"origin": [384, 896], "type": "image", "dimensions": [128, 128], "name": "locomotive_0004.png"}, "locomotive_0005.png": {"origin": [256, 896], "type": "image", "dimensions": [128, 128], "name": "locomotive_0005.png"}, "clean_tile_0000.png": {"origin": [512, 512], "type": "image", "dimensions": [128, 256], "name": "clean_tile_0000.png"}, "straight_rail_0001.png": {"origin": [640, 512], "type": "image", "dimensions": [128, 256], "name": "straight_rail_0001.png"}, "straight_rail_0000.png": {"origin": [768, 512], "type": "image", "dimensions": [128, 256], "name": "straight_rail_0000.png"}, "red_tank_0003.png": {"origin": [640, 768], "type": "image", "dimensions": [128, 128], "name": "red_tank_0003.png"}, "red_tank_0007.png": {"origin": [128, 768], "type": "image", "dimensions": [128, 128], "name": "red_tank_0007.png"}, "locomotive_0006.png": {"origin": [128, 896], "type": "image", "dimensions": [128, 128], "name": "locomotive_0006.png"}, "straight_angle_rail_0002.png": {"origin": [128, 512], "type": "image", "dimensions": [128, 256], "name": "straight_angle_rail_0002.png"}, "locomotive_0002.png": {"origin": [640, 896], "type": "image", "dimensions": [128, 128], "name": "locomotive_0002.png"}, "straight_angle_rail_0000.png": {"origin": [384, 512], "type": "image", "dimensions": [128, 256], "name": "straight_angle_rail_0000.png"}, "red_tank_0000.png": {"origin": [512, 768], "type": "image", "dimensions": [128, 128], "name": "red_tank_0000.png"}, "red_tank_0002.png": {"origin": [256, 768], "type": "image", "dimensions": [128, 128], "name": "red_tank_0002.png"}, "locomotive_0003.png": {"origin": [512, 896], "type": "image", "dimensions": [128, 128], "name": "locomotive_0003.png"}, "locomotive_0000.png": {"origin": [896, 896], "type": "image", "dimensions": [128, 128], "name": "locomotive_0000.png"}, "locomotive_0001.png": {"origin": [768, 896], "type": "image", "dimensions": [128, 128], "name": "locomotive_0001.png"}}, "tileset_path": "/home/snegovick/dev_games/sorting_yard/media/tilesets/level_0.json", "type": "map", "sprites": {"steam_locomotive": {"type": "sprite", "name": "steam_locomotive", "image_refs": ["locomotive_0007.png", "locomotive_0006.png", "locomotive_0005.png", "locomotive_0004.png", "locomotive_0003.png", "locomotive_0002.png", "locomotive_0001.png", "locomotive_0000.png"]}, "rail": {"type": "sprite", "name": "rail", "image_refs": ["straight_angle_rail_0003.png", "straight_angle_rail_0002.png", "straight_angle_rail_0001.png", "straight_angle_rail_0000.png", "clean_tile_0000.png", "straight_rail_0001.png", "straight_rail_0000.png"]}, "red_tank_car": {"type": "sprite", "name": "red_tank_car", "image_refs": ["red_tank_0004.png", "red_tank_0007.png", "red_tank_0002.png", "red_tank_0005.png", "red_tank_0000.png", "red_tank_0003.png", "red_tank_0006.png", "red_tank_0001.png"]}}},
-
-  tileset_json: {"format": 1, "atlas_size": 1024, "image": "media/tilesets/level_0.png", "images": [{"origin": [512, 512], "name": "clean_tile_0000.png", "dimensions": [128, 256]}, {"origin": [896, 896], "name": "locomotive_0000.png", "dimensions": [128, 128]}, {"origin": [768, 896], "name": "locomotive_0001.png", "dimensions": [128, 128]}, {"origin": [640, 896], "name": "locomotive_0002.png", "dimensions": [128, 128]}, {"origin": [512, 896], "name": "locomotive_0003.png", "dimensions": [128, 128]}, {"origin": [384, 896], "name": "locomotive_0004.png", "dimensions": [128, 128]}, {"origin": [256, 896], "name": "locomotive_0005.png", "dimensions": [128, 128]}, {"origin": [128, 896], "name": "locomotive_0006.png", "dimensions": [128, 128]}, {"origin": [0, 896], "name": "locomotive_0007.png", "dimensions": [128, 128]}, {"origin": [512, 768], "name": "red_tank_0000.png", "dimensions": [128, 128]}, {"origin": [896, 768], "name": "red_tank_0001.png", "dimensions": [128, 128]}, {"origin": [256, 768], "name": "red_tank_0002.png", "dimensions": [128, 128]}, {"origin": [640, 768], "name": "red_tank_0003.png", "dimensions": [128, 128]}, {"origin": [0, 768], "name": "red_tank_0004.png", "dimensions": [128, 128]}, {"origin": [384, 768], "name": "red_tank_0005.png", "dimensions": [128, 128]}, {"origin": [768, 768], "name": "red_tank_0006.png", "dimensions": [128, 128]}, {"origin": [128, 768], "name": "red_tank_0007.png", "dimensions": [128, 128]}, {"origin": [384, 512], "name": "straight_angle_rail_0000.png", "dimensions": [128, 256]}, {"origin": [256, 512], "name": "straight_angle_rail_0001.png", "dimensions": [128, 256]}, {"origin": [128, 512], "name": "straight_angle_rail_0002.png", "dimensions": [128, 256]}, {"origin": [0, 512], "name": "straight_angle_rail_0003.png", "dimensions": [128, 256]}, {"origin": [768, 512], "name": "straight_rail_0000.png", "dimensions": [128, 256]}, {"origin": [640, 512], "name": "straight_rail_0001.png", "dimensions": [128, 256]}], "type": "tset", "sprites": [{"name": "rail", "image_refs": ["straight_angle_rail_0003.png", "straight_angle_rail_0002.png", "straight_angle_rail_0001.png", "straight_angle_rail_0000.png", "clean_tile_0000.png", "straight_rail_0001.png", "straight_rail_0000.png"]}, {"name": "red_tank_car", "image_refs": ["red_tank_0004.png", "red_tank_0007.png", "red_tank_0002.png", "red_tank_0005.png", "red_tank_0000.png", "red_tank_0003.png", "red_tank_0006.png", "red_tank_0001.png"]}, {"name": "steam_locomotive", "image_refs": ["locomotive_0007.png", "locomotive_0006.png", "locomotive_0005.png", "locomotive_0004.png", "locomotive_0003.png", "locomotive_0002.png", "locomotive_0001.png", "locomotive_0000.png"]}]},
   
   atlas: null,
+  images: [],
   sprites: [],
+  layers: [],
 
   load_tileset: function(self) {
     atlas = new Image();
-    atlas.src = tileset_json["image"];
-    sprites
+    atlas.src = map_json["atlas_image"];
   },
 
   init: function(self) {
-    var rt_sprite = new Sprite();
-    rt_sprite.initMultiPath(rt_sprite, self.map["sprites"]["red_tank"]);
-    self.sprites["red_tank"] = rt_sprite;
+    for (var i = 0; i < self.map["images"]; i++) {
+      var image_json = self.map["images"][i];
+      var image = new LImage();
+      image.init(image, image_json);
+      self.images.push_back(image);
+    }
+
+    for (var i = 0; i < self.map["sprites"]; i++) {
+      var sprite_json = self.map["sprites"][i];
+      var sprite = new Sprite();
+      sprite.init(sprite, sprite_json);
+      self.sprites.push_back(self.sprite);
+    }
   },
 
   draw: function(self) {
@@ -446,47 +477,47 @@ GameLogic.prototype = {
   },
 
   draw: function(self) {
-    self.displayRailNode(self, 0, true);
-    self.drawTasks(self);
+    // self.displayRailNode(self, 0, true);
+    // self.drawTasks(self);
 
-    self.second_ctr ++;
-    if (self.second_ctr > self.const_ticks_in_s) {
-      self.second_ctr = 0;
-      self.new_car_ctr ++;
-      if (self.new_car_ctr > self.const_new_car_timeout) {
-        self.new_car_ctr = 0;
-        if (!self.level_stop) {
-          self.mk_car(self);
-        }
-      }
-    }
+    // self.second_ctr ++;
+    // if (self.second_ctr > self.const_ticks_in_s) {
+    //   self.second_ctr = 0;
+    //   self.new_car_ctr ++;
+    //   if (self.new_car_ctr > self.const_new_car_timeout) {
+    //     self.new_car_ctr = 0;
+    //     if (!self.level_stop) {
+    //       self.mk_car(self);
+    //     }
+    //   }
+    // }
 
-    //console.log("cars length:"+self.cars.length);
-    for (var i = 0; i < self.cars.length; i++) {
-      self.displayCar(self, i);
-      if (!self.level_stop) {
-        if (!self.advanceCar(self, i)) {
-          i-=1;
-        }
-      }
-    }
+    // //console.log("cars length:"+self.cars.length);
+    // for (var i = 0; i < self.cars.length; i++) {
+    //   self.displayCar(self, i);
+    //   if (!self.level_stop) {
+    //     if (!self.advanceCar(self, i)) {
+    //       i-=1;
+    //     }
+    //   }
+    // }
 
-    for (var t in self.trains) {
-      for (var i = 0; i < self.trains[t]["cars"].length; i++) {
-        var car = self.trains[t]["cars"][i];
-        self.displayStoppedCar(self, car);
-      }
-    }
+    // for (var t in self.trains) {
+    //   for (var i = 0; i < self.trains[t]["cars"].length; i++) {
+    //     var car = self.trains[t]["cars"][i];
+    //     self.displayStoppedCar(self, car);
+    //   }
+    // }
     
-    if (self.level_stop) {
-      var old_font = gamescreen.ctx.font;
-      var go = "GAME OVER";
-      var go_width = go.length*24;
-      var go_height = 24;
-      gamescreen.ctx.font = "bold 24px Arial";
-      gamescreen.ctx.fillText(go, gamescreen.width/2-go_width/2, gamescreen.height/2-go_height/2);
-      gamescreen.ctx.font = old_font;
-    }
+    // if (self.level_stop) {
+    //   var old_font = gamescreen.ctx.font;
+    //   var go = "GAME OVER";
+    //   var go_width = go.length*24;
+    //   var go_height = 24;
+    //   gamescreen.ctx.font = "bold 24px Arial";
+    //   gamescreen.ctx.fillText(go, gamescreen.width/2-go_width/2, gamescreen.height/2-go_height/2);
+    //   gamescreen.ctx.font = old_font;
+    // }
 
     //draw score
     gamescreen.put_text(gamescreen, "bold 20px Arial", "black", "Score: "+self.score, 100, 100);
