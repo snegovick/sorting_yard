@@ -14,7 +14,7 @@ GameScreen.prototype = {
   width: 0,
   height: 0,
   ctx: null,
-  const_fps: 30,
+  const_fps: 1,
   frame_timeout: 0,
 
 
@@ -90,20 +90,22 @@ LImage.prototype = {
   origin: null,
   dimensions: null,
   name: name,
-  image: null,
 
   init: function(self, image_json) {
     self.name = image_json["name"];
     self.origin = image_json["origin"];
     self.dimensions = image_json["dimensions"];
-    console.log("loading image "+self.name);
+    // console.log("loading image "+self.name);
   },
 
   draw: function(self, x, y) {
-    gamescreen.ctx.drawImage(self.image, 
+    console.log("x, y: "+x+", "+y);
+    console.log("origin: "+self.origin);
+    console.log("dimensions: "+self.dimensions);
+    gamescreen.ctx.drawImage(map.atlas, 
                              self.origin[0], self.origin[1], 
                              self.dimensions[0], self.dimensions[1], 
-                             x-self.image.width/2, y-self.image.height/2,
+                             x-self.dimensions[0]/2, y-self.dimensions[1]/2,
                              self.dimensions[0], self.dimensions[1]);
   }
 
@@ -112,9 +114,9 @@ LImage.prototype = {
 function Sprite() {};
 
 Sprite.prototype = {
-  images: null,
+  images: [],
   frames: 0,
-  name: name,
+  name: "",
 
   init: function(self, sprite_json) {
     self.name = sprite_json["name"];
@@ -123,23 +125,24 @@ Sprite.prototype = {
 
     self.images = [];
     for (var i = 0; i < self.frames; i++) {
-      var image = map.get_image_by_name(map, name);
+      var image = map.get_image_by_name(map, image_refs[i]);
+      if (image === null) {
+        console.log("null image: "+image_refs[i]);
+      }
       self.images.push(image);
     }
   },
 
+  get_n_frames: function(self) {
+    return self.frames;
+  },
+
   drawFrame: function(self, frame, x, y) {
     var image = self.images[frame];
-    image.draw(x, y);
+    image.draw(image, x, y);
   },
 
   draw: function(self, x, y) {
-    self.frame_time_counter ++;
-    if (self.frame_time_counter > self.frame_time) {
-      self.frame_time_counter = 0;
-      self.current_frame = self.current_frame + 1;
-      self.current_frame = self.current_frame % self.img_objects.length;
-    }
     self.drawFrame(self, self.current_frame, x, y);
   }
 
@@ -152,20 +155,32 @@ Map.prototype = {
   
   atlas: null,
   images: {},
-  sprites: [],
-  layers: [],
+  sprites: {},
+  layers: {},
 
   get_image_by_name: function(self, name) {
-    return self.images[name]
+    if (name in self.images) {
+      return self.images[name];
+    }
+    return null;
+  },
+
+  get_sprite_by_name: function(self, name) {
+    if (name in self.sprites) {
+      return self.sprites[name];
+    }
+    return null;
   },
 
   init: function(self) {
     self.atlas = new Image();
+    self.atlas.onLoad=function() {
+      console.log("atlas loaded");
+    };
     self.atlas.src = self.map["atlas_path"];
 
     for (var i in self.map["images"]) {
       var image_json = self.map["images"][i];
-      console.log("image json: "+image_json);
       var image = new LImage();
       image.init(image, image_json);
       self.images[image.name] = image;
@@ -177,13 +192,85 @@ Map.prototype = {
       sprite.init(sprite, sprite_json);
       self.sprites[sprite.name] = sprite;
     }
+
+    for (var l in self.map["layers"]) {
+      var layer_json = self.map["layers"][l];
+      var layer = new Layer();
+      layer.init(layer, layer_json);
+      self.layers[layer.name] = layer;
+    }
   },
 
   draw: function(self) {
+    var layer = self.layers["main"];
+    layer.draw(layer);
   }
 };
 
 var map = new Map();
+function Layer() {};
+
+Layer.prototype = {
+  name: name,
+  adjacency_dct: {},
+  proxys: [],
+
+  init: function(self, layer_json) {
+    self.name = layer_json["name"];
+    self.adjacency_dct = layer_json["adjacency_dct"];
+    var objects = layer_json["objects"];
+    for (var i = 0; i < objects.length; i++) {
+      var proxy_json = objects[i];
+      var proxy = new Proxy();
+      proxy.init(proxy, proxy_json);
+      self.proxys.push(proxy);
+    }
+  },
+
+  draw: function(self) {
+    for (var i = 0; i < self.proxys.length; i++) {
+      var proxy = self.proxys[i];
+      proxy.draw(proxy);
+    }
+  }
+};
+
+function Proxy() {};
+
+Proxy.prototype = {
+  position: null,
+  name: null,
+  sprite: null,
+  frame: 0,
+  animated: false,
+  frame_time: 0,
+
+  frame_time_counter: 0,
+  current_frame: 0,
+
+  init: function(self, proxy_json) {
+    self.name = proxy_json["name"];
+    self.position = proxy_json["position"];
+    self.frame = proxy_json["frame"];
+    self.current_frame = self.frame;
+    self.animated = proxy_json["animated"];
+    self.frame_time = proxy_json["frame_time"];
+    self.sprite = map.get_sprite_by_name(map, proxy_json["sprite_ref"]);
+  },
+
+  draw: function(self) {
+    if (self.animated) {
+      self.frame_time_counter ++;
+      if (self.frame_time_counter > self.frame_time) {
+        self.frame_time_counter = 0;
+        self.current_frame = self.current_frame + 1;
+        self.current_frame = self.current_frame % self.sprite.get_n_frames(self.sprite);
+      }
+    }
+    self.sprite.drawFrame(self.sprite, self.current_frame, self.position[0], self.position[1]);
+  }
+};
+
 function GameLogic() {};
 
 GameLogic.prototype = {

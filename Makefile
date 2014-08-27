@@ -6,6 +6,8 @@ js_src := util\
           screen\
           sprite\
           map\
+          layer \
+          proxy \
           game_logic\
           main
 

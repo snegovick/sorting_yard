@@ -5,20 +5,32 @@ Map.prototype = {
   
   atlas: null,
   images: {},
-  sprites: [],
-  layers: [],
+  sprites: {},
+  layers: {},
 
   get_image_by_name: function(self, name) {
-    return self.images[name]
+    if (name in self.images) {
+      return self.images[name];
+    }
+    return null;
+  },
+
+  get_sprite_by_name: function(self, name) {
+    if (name in self.sprites) {
+      return self.sprites[name];
+    }
+    return null;
   },
 
   init: function(self) {
     self.atlas = new Image();
+    self.atlas.onLoad=function() {
+      console.log("atlas loaded");
+    };
     self.atlas.src = self.map["atlas_path"];
 
     for (var i in self.map["images"]) {
       var image_json = self.map["images"][i];
-      console.log("image json: "+image_json);
       var image = new LImage();
       image.init(image, image_json);
       self.images[image.name] = image;
@@ -30,9 +42,18 @@ Map.prototype = {
       sprite.init(sprite, sprite_json);
       self.sprites[sprite.name] = sprite;
     }
+
+    for (var l in self.map["layers"]) {
+      var layer_json = self.map["layers"][l];
+      var layer = new Layer();
+      layer.init(layer, layer_json);
+      self.layers[layer.name] = layer;
+    }
   },
 
   draw: function(self) {
+    var layer = self.layers["main"];
+    layer.draw(layer);
   }
 };
 

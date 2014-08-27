@@ -5,7 +5,7 @@ GameScreen.prototype = {
   width: 0,
   height: 0,
   ctx: null,
-  const_fps: 30,
+  const_fps: 1,
   frame_timeout: 0,
 
 
