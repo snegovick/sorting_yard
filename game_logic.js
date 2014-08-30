@@ -57,9 +57,9 @@ GameLogic.prototype = {
     self.train_proxy.initFull(self.train_proxy, "steam_locomotive", self.wpoints[0], 1, false, 1, "steam_locomotive");
     var dimensions = self.train_proxy.get_dimensions(self.train_proxy);
     var pos = self.wpoints[0];
-    self.train_proxy.set_position(self.train_proxy, [pos[0]-dimensions[0]/2, pos[1]-dimensions[1]/2]);
+    self.train_proxy.set_position(self.train_proxy, [pos[0]-dimensions[0]/2, pos[1]-5*dimensions[1]/7]);
 
-    console.log("proxy pos:"+[pos[0]-dimensions[0]/2, pos[1]-dimensions[1]/2]);
+    console.log("proxy pos:"+[pos[0]-dimensions[0]/2, pos[1]-5*dimensions[1]/7]);
     self.adj_graph = map.map["layers"]["waypoints"]["adjacency_dct"];
     self.dir_pt = self.adj_graph[self.dir_pt][0];
     console.log("direction point:"+self.dir_pt);
@@ -74,7 +74,7 @@ GameLogic.prototype = {
     var dt = 1.0/30.0;
     var pos = self.train_proxy.get_position(self.train_proxy);
     var dimensions = self.train_proxy.get_dimensions(self.train_proxy);
-    var dest_real_pos = [self.wpoints[self.dir_pt][0]-dimensions[0]/2, self.wpoints[self.dir_pt][1]-dimensions[1]/2];
+    var dest_real_pos = [self.wpoints[self.dir_pt][0]-dimensions[0]/2, self.wpoints[self.dir_pt][1]-5*dimensions[1]/7];
     var dist = pt_to_pt_dist(pos, dest_real_pos);
     self.dist_lookback.push(dist);
     if (self.dist_lookback.length >= 4) {
