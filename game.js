@@ -99,9 +99,9 @@ LImage.prototype = {
   },
 
   draw: function(self, x, y) {
-    console.log("x, y: "+x+", "+y);
-    console.log("origin: "+self.origin);
-    console.log("dimensions: "+self.dimensions);
+    // console.log("x, y: "+x+", "+y);
+    // console.log("origin: "+self.origin);
+    // console.log("dimensions: "+self.dimensions);
     gamescreen.ctx.drawImage(map.atlas, 
                              self.origin[0], self.origin[1], 
                              self.dimensions[0], self.dimensions[1], 
