@@ -13,6 +13,7 @@ GameLogic.prototype = {
   dir_cos: 0,
   dir_pt: 0,
   dir_ang: 0,
+  dist_lookback: [],
 
   init_wpt: function(self) {
     var objs = map.map["layers"]["waypoints"]["objects"];
@@ -73,14 +74,24 @@ GameLogic.prototype = {
     var dt = 1.0/30.0;
     var pos = self.train_proxy.get_position(self.train_proxy);
     var dimensions = self.train_proxy.get_dimensions(self.train_proxy);
-    var real_pos = [self.wpoints[self.dir_pt][0]-dimensions[0]/2, self.wpoints[self.dir_pt][1]-dimensions[1]/2];
-    var dist = pt_to_pt_dist(pos, real_pos);
-    //console.log("dist:"+dist);
-    if (dist<2.0) {
-      var new_dir_pt = self.adj_graph[self.dir_pt][0];
-      self.calc_direction(self, self.wpoints[self.dir_pt], self.wpoints[new_dir_pt]);
-      self.dir_pt = new_dir_pt;
-      //console.log("new pt:"+self.dir_pt);
+    var dest_real_pos = [self.wpoints[self.dir_pt][0]-dimensions[0]/2, self.wpoints[self.dir_pt][1]-dimensions[1]/2];
+    var dist = pt_to_pt_dist(pos, dest_real_pos);
+    self.dist_lookback.push(dist);
+    if (self.dist_lookback.length >= 4) {
+      self.dist_lookback.shift();
+      //console.log("dist:"+dist);
+      if (self.dist_lookback[2]>self.dist_lookback[1]) {
+        console.log("slip!:"+self.dist_lookback);
+        self.dist_lookback = [];
+        // }
+        // if (dist<2.0) {
+        var new_dir_pt = self.adj_graph[self.dir_pt][0];
+        var dest_pos = self.wpoints[self.dir_pt];
+        self.calc_direction(self, dest_pos, self.wpoints[new_dir_pt]);
+        self.train_proxy.set_position(self.train_proxy, dest_real_pos);
+        self.dir_pt = new_dir_pt;
+        //console.log("new pt:"+self.dir_pt);
+      }
     }
     pos[0] += self.dir_sin*dt*self.default_velocity;
     pos[1] += self.dir_cos*dt*self.default_velocity;
