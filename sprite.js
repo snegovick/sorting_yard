@@ -12,6 +12,10 @@ LImage.prototype = {
     // console.log("loading image "+self.name);
   },
 
+  get_dimensions: function(self) {
+    return self.dimensions;
+  },
+
   draw: function(self, x, y) {
     // console.log("x, y: "+x+", "+y);
     // console.log("origin: "+self.origin);
@@ -19,7 +23,7 @@ LImage.prototype = {
     gamescreen.ctx.drawImage(map.atlas, 
                              self.origin[0], self.origin[1], 
                              self.dimensions[0], self.dimensions[1], 
-                             x-self.dimensions[0]/2, y-self.dimensions[1]/2,
+                             x, y,
                              self.dimensions[0], self.dimensions[1]);
   }
 
@@ -45,6 +49,10 @@ Sprite.prototype = {
       }
       self.images.push(image);
     }
+  },
+
+  get_dimensions: function(self, frame) {
+    return self.images[frame].get_dimensions(self.images[frame]);
   },
 
   get_n_frames: function(self) {

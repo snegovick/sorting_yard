@@ -1,8 +1,7 @@
 var logic = function() {
   console.log("loaded");
-
-  gamescreen.init(gamescreen);
   map.init(map);
+  gamescreen.init(gamescreen);
   gamelogic.init(gamelogic);
 
   gamescreen.set_keydown_cb(gamescreen, function(kc) {

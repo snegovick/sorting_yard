@@ -21,6 +21,33 @@ Proxy.prototype = {
     self.sprite = map.get_sprite_by_name(map, proxy_json["sprite_ref"]);
   },
 
+  initFull: function (self, name, position, frame, animated, frame_time, sprite_name) {
+    self.name = name;
+    self.position = [position[0], position[1]];
+    self.frame = frame;
+    self.current_frame = self.frame;
+    self.animated = animated;
+    self.frame_time = frame_time;
+    self.sprite = map.get_sprite_by_name(map, sprite_name);    
+  },
+
+  set_position: function(self, pos) {
+    self.position[0] = pos[0];
+    self.position[1] = pos[1];
+  },
+
+  get_position: function(self) {
+    return [self.position[0], self.position[1]];
+  },
+
+  set_frame: function(self, frame) {
+    self.current_frame = frame;
+  },
+
+  get_dimensions: function(self) {
+    return self.sprite.get_dimensions(self.sprite, self.current_frame);
+  },
+
   draw: function(self) {
     if (self.animated) {
       self.frame_time_counter ++;
