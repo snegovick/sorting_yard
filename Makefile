@@ -18,7 +18,8 @@ models := locomotive-7-128x128\
           straight_rail-1-128x256\
           clean_tile-0-128x256\
           straight_angle_rail-3-128x256 \
-					tree_tile-3-128x256
+					tree_tile-3-128x256 \
+					platform-3-128x256
 
 levels := level_0
 
