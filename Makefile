@@ -9,7 +9,8 @@ js_src := util\
           layer \
           proxy \
           game_logic\
-          main
+          main \
+					game_objects
 
 js_out := game
 
