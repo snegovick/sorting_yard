@@ -14,15 +14,19 @@ js_src := util\
 
 js_out := game
 
-models := locomotive-7-128x128\
-          red_tank-7-128x128\
-          straight_rail-1-128x256\
-          clean_tile-0-128x256\
-          straight_angle_rail-3-128x256 \
-					tree_tile-3-128x256 \
-					platform-3-128x256
+models := locomotive-7-64x64\
+          red_tank-7-64x64\
+          straight_rail-1-64x128\
+          clean_tile-0-64x128\
+          straight_angle_rail-3-64x128 \
+					tree_tile-3-64x128 \
+					platform-3-64x128 \
+					straight_angle_rail_fork-3-64x128 \
+					straight_angle_rail_fork_2-3-64x128
 
 levels := level_0
+
+default_width := 64
 
 # options
 
@@ -75,22 +79,22 @@ clean: clean-sprites
 clean-sprites: $(addprefix clean-sprites-,$(models))
 
 define sprites-ruleset
-build-sprites-$(1): $(call model_sprites,$(1),128,$(call model_name,$(1))_)
+build-sprites-$(1): $(call model_sprites,$(1),$(default_width),$(call model_name,$(1))_)
 
 $(call model_sprites,$(1),1000): $(call model_source,$(1))
 	@echo 'Building sprites for $(1)'
 	@mkdir -p $$(sort $$(dir $$@))
 	@blender -noaudio -b "$$<" -o "$$(dir $$@)" -F PNG -a
 
-$(call model_sprite,$(1),128,$(call model_name,$(1))_%): $(call model_sprite,$(1),1000,%)
+$(call model_sprite,$(1),$(default_width),$(call model_name,$(1))_%): $(call model_sprite,$(1),1000,%)
 	@echo 'Rescale sprite $$* for $(1)'
 	@mkdir -p $$(sort $$(dir $$@))
 	@convert "$$<" -scale $(call model_new_size,$(1)) "$$@"
 
 clean-sprites-$(1):
 	@echo 'Cleaning sprites for $(1)'
-	@rm -f $(call model_sprites,$(1),1000) $(call model_sprites,$(1),128,$(call model_name,$(1))_)
-	@rm -rf $(dir $(call model_sprites,$(1),1000) $(call model_sprites,$(1),128))
+	@rm -f $(call model_sprites,$(1),1000) $(call model_sprites,$(1),$(default_width),$(call model_name,$(1))_)
+	@rm -rf $(dir $(call model_sprites,$(1),1000) $(call model_sprites,$(1),$(default_width)))
 endef
 
 $(foreach m,$(models),$(eval $(call sprites-ruleset,$(m))))
