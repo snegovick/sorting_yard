@@ -128,7 +128,7 @@ Car.prototype = {
     }
     for (var i = 0; i < self.cars.length; i++) {
       self.cars[i].draw(self.cars[i]);
-      console.log("drawing car:"+i);
+      //console.log("drawing car:"+i);
     }
   }
 

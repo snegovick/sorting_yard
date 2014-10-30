@@ -23,6 +23,9 @@ GameLogic.prototype = {
   },
 
   init_wpt: function(self) {
+    if (!("waypoints" in map.map["layers"])) {
+      throw "No waypoints layer in map, thats bad, please review the map";
+    }
     var objs = map.map["layers"]["waypoints"]["objects"];
     self.wpoints = {};
     for (var i = 0; i < objs.length; i++) {
@@ -36,16 +39,16 @@ GameLogic.prototype = {
     // add sin/cos precalc here some time in the future
     self.default_velocity = gamescreen.height/20;
     self.train = new Car();
-    self.train.init(self.train, self.default_velocity, "steam_locomotive");
+    self.train.init(self.train, self.default_velocity, "locomotive");
 
   },
 
   draw: function(self) {
     if (self.cars_added<3) {
-      if (self.train.get_distance(self.train) - self.last_distance > 100) {
+      if (self.train.get_distance(self.train) - self.last_distance > 40) {
         self.cars_added ++;
         var car = new Car();
-        car.init(car, 0, "red_tank_car");
+        car.init(car, 0, "red_tank");
         car.set_head(car, self.train);
         self.last_distance = self.train.get_distance(self.train);
       }

@@ -2,7 +2,8 @@ default: build
 
 # targets
 
-js_src := util\
+js_src := map_file \
+          util\
           screen\
           sprite\
           map\
@@ -38,9 +39,12 @@ map_editor_dir := ./map_editor
 
 jsify = $(addsuffix .js,$(1))
 
-build: build-js-bundle
+build: build-js-bundle map_file.js
 
 build-js-bundle: $(call jsify,$(js_out))
+
+map_file.js: media/maps/level_0.json
+	bash ./mkmap.sh
 
 $(call jsify,$(js_out)): $(call jsify,$(js_src))
 	@echo 'Building js bundle'
