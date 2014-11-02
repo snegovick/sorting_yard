@@ -103,6 +103,8 @@ Car.prototype = {
       var dimensions = self.proxy.get_dimensions(self.proxy);
       var dest_real_pos = [self.wpoints[self.dir_pt][0]-dimensions[0]/2, self.wpoints[self.dir_pt][1]-5*dimensions[1]/7];
       var dist = pt_to_pt_dist(pos, dest_real_pos);
+
+      // look back for collision (if the distance to destination point was decreasing and then started increasing, then we might missed it)
       self.dist_lookback.push(dist);
       if (self.dist_lookback.length >= 4) {
         self.dist_lookback.shift();
